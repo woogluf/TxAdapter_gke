@@ -21,7 +21,8 @@
 
 #define WidthOK(w) ((w>=900) && (w<=2200))
 
-#define CPPM  THROTTLE,ROLL,PITCH,YAW,AUX1,AUX2,AUX3,AUX4 //For JR/Graupner/Spektrum
+//#define CPPM  THROTTLE,ROLL,PITCH,YAW,AUX1,AUX2,AUX3,AUX4 //For JR/Graupner/Spektrum
+#define CPPM  ROLL,PITCH,THROTTLE,YAW,AUX1,AUX2,AUX3,AUX4 //For TH9X ?
 
 const uint8_t TxMap[] = {
   CPPM

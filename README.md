@@ -1,6 +1,15 @@
 Hubsan & FlySky Tx Adapter
 ==========================
 
+Cusomized so TH9X can control the hubsan with simple configuration (no reversed channels and channel order = ROLL,PITCH,THROTTLE,YAW,AUX1,AUX2,AUX3,AUX4)
+The aim is to control de husban with the same settings in 3 cases :
+- DIY RX, hubsan protocol, stock hubsan firmware
+- DIY RX, hubsan protocol, bradwii firmware
+- DIY RX, flysky protocol, bradwii firmware
+- stock TH9X module, flysky protocol, bradwii firmware
+
+see https://github.com/woogluf/bradwii
+
 TxAdapter_gke is an open source standalone adapter translating CPPM signals where 
 available from a transmitter, to Hubsan and FlySky signals.
 

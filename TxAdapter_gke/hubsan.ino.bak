@@ -295,9 +295,9 @@ static void hubsanBuildPacket(void) {
     packet[0] = 0x20;
     packet[2] = currentThrottle;
   }
-  packet[4] = rcData[YAW];
+  packet[4] = 0xff - rcData[YAW];
   packet[6] = 0xff - rcData[PITCH];
-  packet[8] = 0xff - rcData[ROLL]; 
+  packet[8] = rcData[ROLL]; 
 
   packet[9] = 0x20;
 
