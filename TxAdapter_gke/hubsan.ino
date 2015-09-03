@@ -151,31 +151,31 @@ static void hubsanUpdateTelemetry(void) {
     unknown_e0_4, 
     unknown_e0_5,
     unknown_e0_6,
-    unknown_e0_7,
-    unknown_e0_8, 
-    Z_ACC_MSB, 
-    Z_ACC_LSB, 
+    PITCH_GYRO_MSB, 
+    PITCH_GYRO_LSB, 
+    ROLL_GYRO_MSB, 
+    ROLL_GYRO_LSB, 
     YAW_GYRO_MSB, 
     YAW_GYRO_LSB, 
-    VBAT,
+    VBAT_e0,
     CRC0,
     CRC1
   };
 
   enum Tag0xe1 {
     TAG_e1, 
+    unknown_e1_1,
+    unknown_e1_2,
+    unknown_e1_3,
+    unknown_e1_4, 
+    unknown_e1_5,
+    unknown_e1_6,
     PITCH_ACC_MSB,
     PITCH_ACC_LSB,
     ROLL_ACC_MSB,
     ROLL_ACC_LSB, 
-    unknown_e1_5,
-    unknown_e1_6,
-    PITCH_GYRO_MSB, 
-    PITCH_GYRO_LSB, 
-    ROLL_GYRO_MSB, 
-    ROLL_GYRO_LSB, 
-    unknown_e1_11,
-    unknown_e1_12,  
+    Z_ACC_MSB, 
+    Z_ACC_LSB,  
     VBAT_e1,
     CRC0_e1,
     CRC1_e1
@@ -196,45 +196,76 @@ static void hubsanUpdateTelemetry(void) {
         debug[0] = packet[3] << 8 | packet[4];
         debug[1] = packet[5] << 8 | packet[6]; 
         debug[2] = packet[7] << 8 | packet[8]; 
-        accData[YAW] = packet[Z_ACC_MSB] << 8 | packet[Z_ACC_LSB]; // OK
+        gyroData[PITCH] = packet[PITCH_GYRO_MSB] << 8 | packet[PITCH_GYRO_LSB]; 
+        gyroData[ROLL] = packet[ROLL_GYRO_MSB] << 8 | packet[ROLL_GYRO_LSB]; 
         gyroData[YAW] = packet[YAW_GYRO_MSB] << 8 | packet[YAW_GYRO_LSB]; 
-        batteryVolts = packet[VBAT];
+        batteryVolts = packet[VBAT_e0];
         break;
       case 0xe1:
         accData[PITCH] = packet[PITCH_ACC_MSB] << 8 | packet[PITCH_ACC_LSB];  
         accData[ROLL] = packet[ROLL_ACC_MSB] << 8 | packet[ROLL_ACC_LSB]; 
-
-        gyroData[PITCH] = packet[PITCH_GYRO_MSB] << 8 | packet[PITCH_GYRO_LSB]; 
-        gyroData[ROLL] = packet[ROLL_GYRO_MSB] << 8 | packet[ROLL_GYRO_LSB]; 
+        accData[YAW] = packet[Z_ACC_MSB] << 8 | packet[Z_ACC_LSB]; // OK
 
         // use acc as angle alias
         angle[PITCH] = accData[PITCH];
         angle[ROLL] = -accData[ROLL];
-        batteryVolts = packet[VBAT];
+        batteryVolts = packet[VBAT_e1];
         break;
       default:
         break;
       }  
     else 
       if (DEBUG) {
-      //  if (packet[0] == 0xe0) {
-      Serial.print(millis());
-      Serial.print(",");
-      Serial.print(packet[0], HEX);
-      Serial.print(",");
-      for (i = 1;i<12;i+=2) {
-        Serial.print(packet[i] << 8 | packet[i+1]); 
-        Serial.print(",");
-      }
-      Serial.print(packet[11]);  
-      Serial.print(",");    
-      Serial.print(packet[12]);
-      Serial.print(",");
-      Serial.print(packet[13]); 
-      Serial.println();
-      //   } 
+        
+        if (packet[0] == 0xe0) {
+          Serial.print(millis());
+          Serial.print(",");
+        }
+        Serial.print(packet[0], HEX);
+          if (packet[0] == 0xe0) {
+          for (i = 1;i<7;i++) {
+              Serial.print(",");
+              Serial.print(packet[i]); 
+          }
+           /* GYRO PITCH */
+//           Serial.print(",");
+//           Serial.print(packet[7] << 8 | packet[8]); 
+           /* GYRO ROLL ??*/
+//           Serial.print(",");
+//           Serial.print(packet[9] << 8 | packet[10]); 
+           /* GYRO YAW Z */
+//           Serial.print(",");
+//           Serial.print(packet[11] << 8 | packet[12]); 
+          /* voltage en dixieme de volts */
+          //Serial.print(",");
+          //Serial.print(packet[13]); 
+          Serial.print(",");
+         } else {
+          for (i = 1;i<7;i++) {
+              Serial.print(",");
+              Serial.print(packet[i]); 
+          }
+           
+           /* ACC X PITCH */
+//           Serial.print(",");
+//           Serial.print(packet[7] << 8 | packet[8]); 
+           /* ACC Y ROLL */
+//           Serial.print(",");
+//           Serial.print(packet[9] << 8 | packet[10]); 
+           /* ACC Z */
+//           Serial.print(",");
+//           Serial.print(packet[11] << 8 | packet[12]); 
+           /* voltage en dixieme de volts */
+           //Serial.print(",");
+           //Serial.print(packet[13]); 
+           Serial.print(",");
+      Serial.print(rssiBackChannel); 
+           Serial.println();
+      }      
+      
+     
     }
-    else {    
+    /*else {    
       Serial.print(intervalmS);
       Serial.print(" ");
       Serial.print(rssi);  
@@ -246,7 +277,7 @@ static void hubsanUpdateTelemetry(void) {
       Serial.print(disableThrottle);
       Serial.print(" ");
       Serial.println(((uint32_t)throttleLVCScale * 100) >> 10);
-    }
+    }*/
   }
 } // hubsanUpdateTelemetry
 
