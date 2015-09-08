@@ -22,6 +22,8 @@
 #define TX_BUFFER_SIZE 128
 #define INBUF_SIZE 64
 
+#include "Serial.h"
+
 static volatile uint8_t serialHeadTX,serialTailTX;
 static uint8_t serialBufferTX[TX_BUFFER_SIZE];
 static uint8_t inBuf[INBUF_SIZE+1];
@@ -31,22 +33,9 @@ static uint8_t inBuf[INBUF_SIZE+1];
 int16_t pwm[PWM_OUTPUTS] = {
   0};
 
-static struct { // not used by Adapter
-  uint16_t thisVersion;
-  uint8_t P8[PIDITEMS], I8[PIDITEMS], D8[PIDITEMS];
-  uint8_t rcRate8;
-  uint8_t rcExpo8;
-  uint8_t rollPitchRate;
-  uint8_t yawRate;
-  uint8_t dynThrPID;
-  uint8_t thrMid8;
-  uint8_t thrExpo8;
-  uint16_t activate[CHECKBOX_ITEMS];
-  uint16_t cycletimeuS;
-  int16_t minthrottleuS;
-  uint8_t checksum; // must be last! 
-} 
-conf;
+
+
+MwiiConf conf;
 
 
 static uint16_t cycleTimeuS = 2222;

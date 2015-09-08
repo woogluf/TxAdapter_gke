@@ -19,6 +19,7 @@
 #define PROBE_PIN A1 // for dubbing timing etc.
 
 #define USE_HUBSAN_EXTENDED // H107D LED/Flip etc control on AUX channels
+#define HUBSAN_EXTENDED_PROTOCOL // personnal addon for multiwiiconf purpose (need bradwii)
 #define DEFAULT_VTX_FREQ 5885 // x0.001GHz 5725:5995 steps of 5
 #define HUBSAN_LEDS_BIT 2
 #define HUBSAN_FLIP_BIT 3   

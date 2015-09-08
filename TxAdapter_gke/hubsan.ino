@@ -34,7 +34,10 @@
  
  */
 
+#include "Serial.h"
 
+
+extern MwiiConf conf;
 
 uint16_t hubsanVTXFreq;
 uint8_t chan;
@@ -44,6 +47,7 @@ uint32_t sessionID;
 uint8_t hubsanPacketCount;
 uint8_t hubsanTxState, hubsanRFMode;
 
+#define TIME_3000 3400
 enum {
   BIND_1,
   BIND_2,
@@ -180,7 +184,6 @@ static void hubsanUpdateTelemetry(void) {
     CRC0_e1,
     CRC1_e1
   };
-
   uint8_t i;
   static uint32_t lastUpdatemS = millis();
   uint16_t intervalmS;
@@ -211,57 +214,85 @@ static void hubsanUpdateTelemetry(void) {
         angle[ROLL] = -accData[ROLL];
         batteryVolts = packet[VBAT_e1];
         break;
+#ifdef HUBSAN_EXTENDED_PROTOCOL
+      case 0xe3:
+        for (int i=0;i<3;i++) {
+          conf.P8[i]=packet[1+i*3];
+          conf.I8[i]=packet[2+i*3];
+          conf.D8[i]=packet[3+i*3];
+        }
+      break;
+#endif
       default:
         break;
       }  
     else 
       if (DEBUG) {
         
-        if (packet[0] == 0xe0) {
+//        if (packet[0] == 0xe0) {
           Serial.print(millis());
           Serial.print(",");
-        }
+ //       }
         Serial.print(packet[0], HEX);
+          
           if (packet[0] == 0xe0) {
-          for (i = 1;i<7;i++) {
-              Serial.print(",");
-              Serial.print(packet[i]); 
-          }
+          
+//           /* GYRO ANGLE PITCH ? */
+//           Serial.print(",");
+//           Serial.print(packet[1] << 8 | packet[2]); 
+
+//           /* GYRO ANGLE ROLL ? */
+//           Serial.print(",");
+//           Serial.print(packet[3] << 8 | packet[4]);
+
+//           /* ??? */
+//           Serial.print(",");
+//           Serial.print(packet[5] << 8 | packet[6]); 
+
            /* GYRO PITCH */
-//           Serial.print(",");
-//           Serial.print(packet[7] << 8 | packet[8]); 
+           Serial.print(",");
+           Serial.print(packet[7] << 8 | packet[8]); 
            /* GYRO ROLL ??*/
-//           Serial.print(",");
-//           Serial.print(packet[9] << 8 | packet[10]); 
+           Serial.print(",");
+           Serial.print(packet[9] << 8 | packet[10]); 
            /* GYRO YAW Z */
-//           Serial.print(",");
-//           Serial.print(packet[11] << 8 | packet[12]); 
+           Serial.print(",");
+           Serial.print(packet[11] << 8 | packet[12]); 
           /* voltage en dixieme de volts */
-          //Serial.print(",");
-          //Serial.print(packet[13]); 
+          Serial.print(",");
+          Serial.print(packet[13]); 
           Serial.print(",");
          } else {
-          for (i = 1;i<7;i++) {
-              Serial.print(",");
-              Serial.print(packet[i]); 
-          }
+          
+//           /* ACC ANGLE PITCH ? */
+//           Serial.print(",");
+//           Serial.print(packet[1] << 8 | packet[2]); 
+
+//           /* ACC ANGLE ROLL ? */
+//           Serial.print(",");
+//           Serial.print(packet[3] << 8 | packet[4]); 
+
+//           /* ??? */
+//           Serial.print(",");
+//           Serial.print(packet[5] << 8 | packet[6]); 
            
            /* ACC X PITCH */
-//           Serial.print(",");
-//           Serial.print(packet[7] << 8 | packet[8]); 
-           /* ACC Y ROLL */
-//           Serial.print(",");
-//           Serial.print(packet[9] << 8 | packet[10]); 
-           /* ACC Z */
-//           Serial.print(",");
-//           Serial.print(packet[11] << 8 | packet[12]); 
-           /* voltage en dixieme de volts */
-           //Serial.print(",");
-           //Serial.print(packet[13]); 
            Serial.print(",");
+           Serial.print(packet[7] << 8 | packet[8]); 
+           /* ACC Y ROLL */
+           Serial.print(",");
+           Serial.print(packet[9] << 8 | packet[10]); 
+           /* ACC Z */
+           Serial.print(",");
+           Serial.print(packet[11] << 8 | packet[12]); 
+           /* voltage en dixieme de volts */
+           Serial.print(",");
+           Serial.print(packet[13]); 
+           Serial.print(",");
+//           Serial.println();
+      }      
       Serial.print(rssiBackChannel); 
            Serial.println();
-      }      
       
      
     }
@@ -378,8 +409,8 @@ static uint16_t hubsanUpdate(void) {
     a7105Strobe(A7105_STANDBY);
     a7105WriteData(packet, 16, chan);
     hubsanState |= WAIT_WRITE;
-    d = 3000;
-    break;
+    d = 3400;
+    return d;
   case BIND_1 | WAIT_WRITE:
   case BIND_3 | WAIT_WRITE:
   case BIND_5 | WAIT_WRITE:
@@ -395,7 +426,10 @@ static uint16_t hubsanUpdate(void) {
   case BIND_4:
   case BIND_6:
     if (a7105Busy()) {
-      if (DEBUG_PROTOCOL) Serial.println("ns");
+      if (DEBUG_PROTOCOL) {
+        Serial.print(hubsanState);
+        Serial.println(" ns");
+      }
       hubsanState = BIND_1; 
       d = 4500; // No signal, restart binding procedure.  12mS elapsed since last write
     } 
@@ -466,10 +500,11 @@ static uint16_t hubsanUpdate(void) {
         d = 1000; 
       }
 
-      if (++polls >= 7) { // 3ms + 3mS + 4*1ms
-        if (hubsanState == DATA_5) 
+      if (++polls > 7) { // 3ms + 3mS + 4*1ms
+        if (hubsanState == DATA_5) {
           hubsanState = DATA_1;
-        else 
+          polls=0;
+        } else 
           hubsanState++;  
         telemetryState = doTx;   
       }
